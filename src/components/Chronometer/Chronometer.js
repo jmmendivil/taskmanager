@@ -2,8 +2,9 @@ import React from 'react'
 import { Row, Col, Button, Card, ProgressBar } from 'react-bootstrap'
 import { Play, Stop, Check } from 'react-bootstrap-icons'
 
-export default function Chronometer ({ status, title, time, pct, onStart, onStop }) {
+export default function Chronometer ({ status, title, time, pct, onStart, onStop, onDone }) {
   const isChronoRunning = (status === 'started')
+  const disabled = (status === 'disabled')
   const doneBtnVariation = (isChronoRunning) ? 'outline-success' : 'success'
   const progressEnd = (pct >= 100)
   const progressVariant = (pct < 49) ? 'success'
@@ -29,6 +30,7 @@ export default function Chronometer ({ status, title, time, pct, onStart, onStop
         <Row className='mr-0 ml-0'>
           <Col sm={6}>
             <Button
+              disabled={disabled}
               onClick={(isChronoRunning) ? onStop : onStart}
               variant='outline-primary'
             >
@@ -39,6 +41,8 @@ export default function Chronometer ({ status, title, time, pct, onStart, onStop
           </Col>
           <Col sm={6}>
             <Button
+              disabled={disabled}
+              onClick={onDone}
               variant={doneBtnVariation}
             >
               <Check /> Terminar

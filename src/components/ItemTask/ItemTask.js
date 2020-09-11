@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Button, Badge } from 'react-bootstrap'
-import { Trash, Check, Pencil } from 'react-bootstrap-icons'
+import { Trash, Check, Pencil, CheckCircleFill } from 'react-bootstrap-icons'
 import { DURATION, DURATION_LABELS } from '../../config'
 
 export default function ItemTask ({ task, onUpdate, onDelete, disabled }) {
@@ -10,7 +10,7 @@ export default function ItemTask ({ task, onUpdate, onDelete, disabled }) {
 
   const handleEditClick = () => setEdit(true)
   const handleSaveClick = () => {
-    if (_title === '') return
+    if (_title === '') return // title, please
     task.title = _title
     task.duration = _duration
     setEdit(false)
@@ -45,18 +45,19 @@ export default function ItemTask ({ task, onUpdate, onDelete, disabled }) {
     return <Badge variant='light'>{label}</Badge>
   }
 
+  // empty title means new task, edit asap
   useEffect(() => {
     if (task.title === '') setEdit(true)
   }, [task.title])
 
-  const disabledClass = (disabled) ? 'disabled' : ''
-  // const isCustomDuration = (_duration !== DURATION.SHORT && _duration !== DURATION.MIDDLE && _duration !== DURATION.LARGE)
+  const disabledClass = (disabled || task.done) ? 'disabled' : ''
 
-  if (editing) {
+  // can edit if it is disabled (chronometer running)
+  if (editing && !disabled) {
     return (
       <>
         <tr className='task-item is-editing'>
-          <td>
+          <td colSpan={2}>
             <input
               type='text'
               value={_title}
@@ -81,7 +82,7 @@ export default function ItemTask ({ task, onUpdate, onDelete, disabled }) {
           </td>
         </tr>
         <tr className='tr--controls'>
-          <td colSpan={1} className='td--delete'>
+          <td colSpan={2} className='td--delete'>
             <Button onClick={handleDeleteClick} variant='link'><Trash color='#dc3545' /></Button>
           </td>
           <td colSpan={2}>
@@ -93,6 +94,7 @@ export default function ItemTask ({ task, onUpdate, onDelete, disabled }) {
   } else {
     return (
       <tr className={disabledClass + ' task-item'}>
+        <td>{(task.done) && <CheckCircleFill className='text-success' />}</td>
         <td>{_title}</td>
         <td><DurationBadge /></td>
         <td className='td--actions'>

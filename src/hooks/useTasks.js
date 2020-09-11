@@ -27,5 +27,5 @@ export default function useTasks (initTasks, newTaskModelFn) {
     )
   }, [tasks])
 
-  return { tasks, firstTask, createTask, updateTask, deleteTask }
+  return { tasks, firstTask, createTask, updateTask, deleteTask, setTasks }
 }

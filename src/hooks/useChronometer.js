@@ -47,6 +47,8 @@ export default function useChronometer () {
     setStatus('started')
   }
 
+  const resetLabels = () => setProgress([0, '00:00'])
+
   const stopChronometer = () => {
     if (requestId) {
       window.cancelAnimationFrame(requestId)
@@ -55,5 +57,5 @@ export default function useChronometer () {
     setStatus('stoped')
   }
 
-  return { status, progress, startChronometer, stopChronometer }
+  return { status, progress, startChronometer, stopChronometer, resetLabels }
 }

@@ -12,7 +12,7 @@ import getDiffs from './utils/getDiffs'
 import _tasks from './models/tasks.seed'
 
 function App () {
-  const { tasks, firstTask, createTask, updateTask, deleteTask } = useTasks(
+  const { tasks, firstTask, createTask, updateTask, deleteTask, setTasks } = useTasks(
     _tasks,
     () => ({ ...TASK_MODEL, created: Date.now() })
   )
@@ -21,28 +21,52 @@ function App () {
   // y u no use current emtpy-task? ლ(ಠ益ಠლ)
   const handleCreateTask = () => {
     if (firstTask.title === '') return
+    resetLabels()
     createTask()
   }
 
-  const { status, progress, startChronometer, stopChronometer } = useChronometer()
+  // running task is always the first one
+  // mark done and move it to the end
+  const handleDoneTask = () => {
+    stopChronometer()
+    resetLabels()
+
+    // no need to update task
+    // because next step is to swap
+    firstTask.done = true
+
+    // swap tasks
+    const newTasks = [...tasks]
+    newTasks.shift()
+    newTasks.push(firstTask)
+    setTasks(newTasks)
+  }
+
+  const { status, progress, startChronometer, stopChronometer, resetLabels } = useChronometer()
 
   const handleChronoStart = () => {
-    // update start-date
+    // update latest start-date
     const now = Date.now()
     firstTask.updates.unshift([now])
-    // run chronometer
     startChronometer(firstTask.duration, firstTask.progress, now)
   }
   const handleChronoStop = () => {
-    // stop chronometer
     stopChronometer()
-    // update end-date
+    // update latest end-date
     firstTask.updates[0].push(Date.now())
-    // update progress
+    // update progress: current progress + previous progress
     const { diff } = getDiffs(firstTask.updates[0], firstTask.progress)
     firstTask.progress = diff
-    // update first & all tasks
+    // update first tasks (and all, because internal useEffect)
     updateTask(0)(firstTask)
+  }
+
+  // intercept chrono status
+  let isChronoDisabled
+  if (firstTask) {
+    isChronoDisabled = (firstTask.done || firstTask.title === '')
+  } else {
+    isChronoDisabled = true // no firstTask, disable chronometer
   }
 
   const hasTasks = (tasks.length > 0)
@@ -82,10 +106,11 @@ function App () {
         <Col md={4}>
           {(hasTasks) && (
             <Chronometer
-              status={status}
+              status={(isChronoDisabled) ? 'disabled' : status}
               title={tasks[0].title}
               time={progress[1]}
               pct={progress[0]}
+              onDone={handleDoneTask}
               onStart={handleChronoStart}
               onStop={handleChronoStop}
             />
