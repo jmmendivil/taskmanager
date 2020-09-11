@@ -13,13 +13,18 @@
   color: white;
 }
 
+.disabled.task-item {
+  color: var(--gray);
+  background-color: var(--light);
+}
 
 .row {
   margin-top: 15px;
   margin-bottom: 15px;
 }
 
-.td--actions button {
+.td--actions button,
+.disabled.task-item:hover .td--actions button {
   visibility: hidden;
   vertical-align: middle !important;
 }
