@@ -17,6 +17,13 @@ function App () {
     () => ({ ...TASK_MODEL, created: Date.now() })
   )
 
+  // simple validation
+  // y u no use current emtpy-task? ლ(ಠ益ಠლ)
+  const handleCreateTask = () => {
+    if (firstTask.title === '') return
+    createTask()
+  }
+
   const { status, progress, startChronometer, stopChronometer } = useChronometer()
 
   const handleChronoStart = () => {
@@ -49,7 +56,7 @@ function App () {
 
       <Row>
         <Col>
-          <Button onClick={createTask} disabled={isChronoRunning}>
+          <Button onClick={handleCreateTask} disabled={isChronoRunning}>
             <Plus /> Nueva Tarea
           </Button>
         </Col>
