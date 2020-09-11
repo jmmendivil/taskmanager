@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import getDiffs from '../utils/getDiffs'
 
+// use with rAF
+let requestId
 export default function useChronometer () {
-  const [status, setStatus] = useState('stoped')
-  // interval
-  const [chronometer, setChronometer] = useState()
+  const [status, setStatus] = useState('idle')
   // percent & label
   const [progress, setProgress] = useState([0, '00:00'])
-
 
   const getProgressPct = (duration, progress) => {
     const durationMillis = duration * 60 * 1000
@@ -21,24 +20,40 @@ export default function useChronometer () {
   }
 
   const startChronometer = (duration, prevProgress, startDate) => {
-    setChronometer(
-      setInterval(() => {
+    let start
+    const timerStuff = timestamp => {
+      // "remove" requestId to enable the loop
+      requestId = undefined
+      // execute every 1sec
+      if (start === undefined) start = timestamp
+      if (timestamp >= start + 1000) {
+        start = timestamp
+        // actual stuff
         const { diff, secs, mins } = getDiffs([startDate, +Date.now()], prevProgress)
         setProgress([
           getProgressPct(duration, diff),
           formatTimeText(mins, secs)
         ])
-      }, 1000)
-    )
+      }
+      // loop it!
+      startrAF()
+    }
+    const startrAF = () => {
+      if (!requestId) {
+        requestId = window.requestAnimationFrame(timerStuff)
+      }
+    }
+    startrAF()
     setStatus('started')
   }
 
   const stopChronometer = () => {
-    clearInterval(chronometer)
+    if (requestId) {
+      window.cancelAnimationFrame(requestId)
+      requestId = undefined
+    }
     setStatus('stoped')
   }
 
-
   return { status, progress, startChronometer, stopChronometer }
-
 }

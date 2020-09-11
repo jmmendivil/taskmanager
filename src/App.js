@@ -9,77 +9,32 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import Chronometer from './components/Chronometer/Chronometer'
 import useChronometer from './hooks/useChronometer'
 import getDiffs from './utils/getDiffs'
-
-const _tasks = [
-  {
-    title: 'A Sed explicabo voluptate a ex alias esse ',
-    duration: 30,
-    progress: 233,
-    created: 23947829,
-    updates: [
-      [32423, 23423],
-      [32423, 23423],
-      [32423, 23423]
-    ]
-  },
-  {
-    title: 'B Illo provident repellat',
-    duration: 45,
-    progress: 23,
-    created: 2349087,
-    updates: [
-      [32423, 23423],
-      [32423, 23423],
-      [32423, 23423]
-    ]
-  },
-  {
-    title: 'C Dolor odit quod voluptatum nulla totam',
-    duration: 60,
-    progress: 23,
-    created: 23084029,
-    updates: [
-      [32423, 23423],
-      [32423, 23423],
-      [32423, 23423]
-    ]
-  }
-]
+import _tasks from './models/tasks.seed'
 
 function App () {
-  const {
-    tasks,
-    firstTask,
-    createTask,
-    updateTask,
-    deleteTask
-  } = useTasks(
-    // initial tasks
+  const { tasks, firstTask, createTask, updateTask, deleteTask } = useTasks(
     _tasks,
-    // create emtpy task
     () => ({ ...TASK_MODEL, created: Date.now() })
   )
 
-  const {
-    status,
-    progress,
-    startChronometer,
-    stopChronometer
-  } = useChronometer()
+  const { status, progress, startChronometer, stopChronometer } = useChronometer()
 
   const handleChronoStart = () => {
+    // update start-date
     const now = Date.now()
     firstTask.updates.unshift([now])
     // run chronometer
     startChronometer(firstTask.duration, firstTask.progress, now)
   }
   const handleChronoStop = () => {
+    // stop chronometer
+    stopChronometer()
     // update end-date
     firstTask.updates[0].push(Date.now())
     // update progress
     const { diff } = getDiffs(firstTask.updates[0], firstTask.progress)
     firstTask.progress = diff
-    stopChronometer()
+    // update first & all tasks
     updateTask(0)(firstTask)
   }
 
@@ -133,8 +88,4 @@ function App () {
     </Container>
   )
 }
-// <Button><Trash color='#dc3545'/></Button>
-// <Card.Text>
-// With supporting text below as a natural lead-in to additional content.
-  // </Card.Text>
 export default App
