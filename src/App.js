@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { DragDropContext, Droppable } from 'react-beautiful-dnd'
 import { Container, Row, Col, Button, Table } from 'react-bootstrap'
 import { Plus } from 'react-bootstrap-icons'
@@ -9,21 +9,18 @@ import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Chronometer from './components/Chronometer/Chronometer'
 import useChronometer from './hooks/useChronometer'
-import getDiffs from './utils/getDiffs'
-import _tasks from './models/tasks.seed'
+import getDiffs from './utils/getDiffsTime'
 
 function App () {
   // -- Tasks
   const { tasks, firstTask, createTask, updateTask, deleteTask, setTasks } = useTasks(
-    _tasks,
     () => ({ ...TASK_MODEL, created: Date.now() })
   )
-
+  const hasTasks = (tasks.length > 0)
   // simple validation
   // y u no use current emtpy-task? ლ(ಠ益ಠლ)
   const handleCreateTask = () => {
     if (firstTask.title === '') return
-    resetLabels()
     createTask()
   }
 
@@ -31,12 +28,9 @@ function App () {
   // mark done and move it to the end
   const handleDoneTask = () => {
     stopChronometer()
-    resetLabels()
-
     // no need to update task
     // because next step is to swap
     firstTask.done = true
-
     // swap tasks
     const newTasks = [...tasks]
     newTasks.shift()
@@ -45,7 +39,8 @@ function App () {
   }
 
   // -- Chronometer
-  const { status, progress, startChronometer, stopChronometer, resetLabels } = useChronometer()
+  const { status, progress, startChronometer, stopChronometer, resetChronometer } = useChronometer()
+  const isChronoRunning = (status === 'started')
 
   const handleChronoStart = () => {
     // update latest start-date
@@ -60,9 +55,27 @@ function App () {
     // update progress: current progress + previous progress
     const { diff } = getDiffs(firstTask.updates[0], firstTask.progress)
     firstTask.progress = diff
-    // update first tasks (and all, because internal useEffect)
+    // update first tasks
     updateTask(0)(firstTask)
   }
+  // show labels with first task progress
+  useEffect(() => {
+    if (typeof firstTask === 'undefined') return
+    resetChronometer(firstTask.duration, firstTask.progress)
+  }, [firstTask])
+
+  // stop chronometer on window close
+  useEffect(() => {
+    if (isChronoRunning) {
+      const handleBeforeunload = evt => {
+        handleChronoStop()
+        evt.preventDefault()
+        evt.returnValue = ''
+      }
+      window.addEventListener('beforeunload', handleBeforeunload)
+      return () => { window.removeEventListener('beforeunload', handleBeforeunload) }
+    }
+  }, [isChronoRunning])
 
   // intercept chrono status
   let isChronoDisabled
@@ -86,11 +99,7 @@ function App () {
     newTasks.splice(source.index, 1)
     newTasks.splice(destination.index, 0, tasks[source.index])
     setTasks(newTasks)
-    resetLabels()
   }
-
-  const hasTasks = (tasks.length > 0)
-  const isChronoRunning = (status === 'started')
 
   return (
     <Container>

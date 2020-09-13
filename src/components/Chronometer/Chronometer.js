@@ -6,6 +6,7 @@ export default function Chronometer ({ status, title, time, pct, onStart, onStop
   const isChronoRunning = (status === 'started')
   const disabled = (status === 'disabled')
   const doneBtnVariation = (isChronoRunning) ? 'outline-success' : 'success'
+  const timerClass = (isChronoRunning) ? '' : 'text-muted'
   const progressEnd = (pct >= 100)
   const progressVariant = (pct < 49) ? 'success'
     : (pct < 69) ? 'info'
@@ -17,7 +18,7 @@ export default function Chronometer ({ status, title, time, pct, onStart, onStop
         {title}
       </Card.Header>
       <Card.Body>
-        <div className='card-title h1 text-center text-monospace'>
+        <div className={timerClass + ' card-title h1 text-center text-monospace'}>
           {time}
         </div>
         <div className='text-center mb-3'>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import getDiffs from '../utils/getDiffs'
+import getDiffsTime from '../utils/getDiffsTime'
 
 // use with rAF
 let requestId
@@ -29,7 +29,7 @@ export default function useChronometer () {
       if (timestamp >= start + 1000) {
         start = timestamp
         // actual stuff
-        const { diff, secs, mins } = getDiffs([startDate, +Date.now()], prevProgress)
+        const { diff, secs, mins } = getDiffsTime([startDate, +Date.now()], prevProgress)
         setProgress([
           getProgressPct(duration, diff),
           formatTimeText(mins, secs)
@@ -47,8 +47,6 @@ export default function useChronometer () {
     setStatus('started')
   }
 
-  const resetLabels = () => setProgress([0, '00:00'])
-
   const stopChronometer = () => {
     if (requestId) {
       window.cancelAnimationFrame(requestId)
@@ -57,5 +55,13 @@ export default function useChronometer () {
     setStatus('stoped')
   }
 
-  return { status, progress, startChronometer, stopChronometer, resetLabels }
+  const resetChronometer = (duration, prevProgress) => {
+    const { diff, secs, mins } = getDiffsTime([0, 0], prevProgress)
+    setProgress([
+      getProgressPct(duration, diff),
+      formatTimeText(mins, secs)
+    ])
+  }
+
+  return { status, progress, startChronometer, stopChronometer, resetChronometer }
 }

@@ -1,7 +1,25 @@
+import _tasks from '../models/tasks.seed'
 import { useState, useEffect } from 'react'
-export default function useTasks (initTasks, newTaskModelFn) {
-  const [tasks, setTasks] = useState(initTasks)
-  const [firstTask, setFirstTask] = useState()
+
+// load previous tasks
+let savedTasks = window.localStorage.getItem('arkon_tasks')
+if (!savedTasks) savedTasks = _tasks // use seeds on first use
+if (typeof savedTasks === 'string') savedTasks = JSON.parse(savedTasks)
+
+export default function useTasks (newTaskModelFn) {
+  const [tasks, setTasks] = useState(savedTasks)
+  const [firstTask, setFirstTask] = useState(savedTasks[0])
+
+  useEffect(() => {
+    if (typeof tasks !== 'undefined') {
+      // save tasks to storage
+      window.localStorage.setItem('arkon_tasks', JSON.stringify(tasks))
+      // update firstTask
+      setFirstTask(
+        JSON.parse(JSON.stringify(tasks[0])) // deep clone
+      )
+    }
+  }, [tasks])
 
   const createTask = () => {
     const newTasks = [...tasks]
@@ -19,13 +37,6 @@ export default function useTasks (initTasks, newTaskModelFn) {
     newTasks.splice(index, 1)
     setTasks(newTasks)
   }
-
-  useEffect(() => {
-    setFirstTask(
-      // deep clone
-      JSON.parse(JSON.stringify(tasks[0]))
-    )
-  }, [tasks])
 
   return { tasks, firstTask, createTask, updateTask, deleteTask, setTasks }
 }
