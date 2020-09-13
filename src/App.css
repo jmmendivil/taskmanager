@@ -13,6 +13,10 @@
   color: white;
 }
 
+.task-item {
+  background-color: var(--white);
+}
+
 .disabled.task-item {
   color: var(--gray);
   background-color: var(--light);
@@ -56,6 +60,18 @@
 .tr--controls td {
   padding: .25rem !important;
   border-top: none !important;
+}
+
+.is-dragging td {
+  border-bottom: 1px solid;
+  border-color: var(--primary) !important;
+  background-color: #e3f0ff;
+}
+.is-dragging td:first-of-type {
+  border-left: 1px solid var(--primary) !important;
+}
+.is-dragging td:last-of-type {
+  border-right: 1px solid var(--primary) !important;
 }
 
 .form-control-xs {

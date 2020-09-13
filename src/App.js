@@ -1,4 +1,5 @@
 import React from 'react'
+import { DragDropContext, Droppable } from 'react-beautiful-dnd'
 import { Container, Row, Col, Button, Table } from 'react-bootstrap'
 import { Plus } from 'react-bootstrap-icons'
 import ItemTask from './components/ItemTask/ItemTask'
@@ -12,6 +13,7 @@ import getDiffs from './utils/getDiffs'
 import _tasks from './models/tasks.seed'
 
 function App () {
+  // -- Tasks
   const { tasks, firstTask, createTask, updateTask, deleteTask, setTasks } = useTasks(
     _tasks,
     () => ({ ...TASK_MODEL, created: Date.now() })
@@ -42,6 +44,7 @@ function App () {
     setTasks(newTasks)
   }
 
+  // -- Chronometer
   const { status, progress, startChronometer, stopChronometer, resetLabels } = useChronometer()
 
   const handleChronoStart = () => {
@@ -69,6 +72,23 @@ function App () {
     isChronoDisabled = true // no firstTask, disable chronometer
   }
 
+  // --- DnD
+  const handleDragEnd = result => {
+    const { source, destination } = result
+
+    if (!destination) return
+    if (
+      destination.index === source.index &&
+      destination.droppableId === source.droppableId
+    ) return
+
+    const newTasks = [...tasks]
+    newTasks.splice(source.index, 1)
+    newTasks.splice(destination.index, 0, tasks[source.index])
+    setTasks(newTasks)
+    resetLabels()
+  }
+
   const hasTasks = (tasks.length > 0)
   const isChronoRunning = (status === 'started')
 
@@ -88,20 +108,30 @@ function App () {
 
       <Row>
         <Col md={8}>
-          <Table>
-            <tbody>
-              {(hasTasks) && tasks.map((task, i) => (
-                <ItemTask
-                  key={task.created}
-                  index={i}
-                  onUpdate={updateTask(i)}
-                  onDelete={deleteTask(i)}
-                  disabled={isChronoRunning}
-                  task={task}
-                />
-              ))}
-            </tbody>
-          </Table>
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Table className='table--dnd'>
+              <Droppable droppableId='9999'>
+                {provided => (
+                  <tbody
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                  >
+                    {(hasTasks) && tasks.map((task, i) => (
+                      <ItemTask
+                        key={task.created}
+                        index={i}
+                        onUpdate={updateTask(i)}
+                        onDelete={deleteTask(i)}
+                        disabled={isChronoRunning}
+                        task={task}
+                      />
+                    ))}
+                    {provided.placeholder}
+                  </tbody>
+                )}
+              </Droppable>
+            </Table>
+          </DragDropContext>
         </Col>
         <Col md={4}>
           {(hasTasks) && (

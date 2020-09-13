@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from 'react'
+import { Draggable } from 'react-beautiful-dnd'
 import { Button, Badge } from 'react-bootstrap'
 import { Trash, Check, Pencil, CheckCircleFill } from 'react-bootstrap-icons'
 import { DURATION, DURATION_LABELS } from '../../config'
 
-export default function ItemTask ({ task, onUpdate, onDelete, disabled }) {
+const TD_WIDTH = {
+  fivepercent: { width: '5%' },
+  tenpercent: { width: '10%' },
+  fifteenpercent: { width: '15%' },
+  onequarter: { width: '25%' },
+  half: { width: '50%' },
+  threequarters: { width: '75%' },
+  full: { width: '100%' }
+}
+
+export default function ItemTask ({ task, index, onUpdate, onDelete, disabled }) {
   const [editing, setEdit] = useState(false)
   const [_title, setTitle] = useState(task.title)
   const [_duration, setDuration] = useState(task.duration)
@@ -52,12 +63,22 @@ export default function ItemTask ({ task, onUpdate, onDelete, disabled }) {
 
   const disabledClass = (disabled || task.done) ? 'disabled' : ''
 
-  // can edit if it is disabled (chronometer running)
+  const getItemClass = (isDragging) => {
+    return (isDragging) ? 'is-dragging' : ''
+  }
+
+  const getItemStyle = (isDragging, _styles) => {
+    return (isDragging)
+      ? { ..._styles, display: 'table' }
+      : _styles
+  }
+
+  // can't edit if it is disabled (chronometer running)
   if (editing && !disabled) {
     return (
       <>
         <tr className='task-item is-editing'>
-          <td colSpan={2}>
+          <td colSpan={2} style={TD_WIDTH.threequarters}>
             <input
               type='text'
               value={_title}
@@ -66,7 +87,7 @@ export default function ItemTask ({ task, onUpdate, onDelete, disabled }) {
               placeholder='Tarea'
             />
           </td>
-          <td colSpan={2}>
+          <td colSpan={2} style={TD_WIDTH.onequarter}>
             <input
               type='number'
               min={1}
@@ -82,25 +103,44 @@ export default function ItemTask ({ task, onUpdate, onDelete, disabled }) {
           </td>
         </tr>
         <tr className='tr--controls'>
-          <td colSpan={2} className='td--delete'>
+          <td colSpan={2} className='td--delete' style={TD_WIDTH.threequarters}>
             <Button onClick={handleDeleteClick} variant='link'><Trash color='#dc3545' /></Button>
           </td>
-          <td colSpan={2}>
+          <td colSpan={2} style={TD_WIDTH.onequarter}>
             <Button variant='success' size='sm' onClick={handleSaveClick} block><Check /></Button>
           </td>
         </tr>
       </>
     )
-  } else {
-    return (
-      <tr className={disabledClass + ' task-item'}>
-        <td>{(task.done) && <CheckCircleFill className='text-success' />}</td>
-        <td>{_title}</td>
-        <td><DurationBadge /></td>
-        <td className='td--actions'>
-          <Button variant='outline-secondary' size='sm' onClick={handleEditClick} className='button--action'><Pencil /></Button>
-        </td>
-      </tr>
-    )
   }
+  return (
+    <Draggable
+      draggableId={task.created + 'zzz'}
+      index={index}
+      isDragDisabled={task.done || disabled}
+    >
+      {(provided, snapshot) => (
+        <tr
+          className={disabledClass + ' task-item ' + getItemClass(snapshot.isDragging)}
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
+        >
+          <td style={TD_WIDTH.fivepercent}>
+            {(task.done) && <CheckCircleFill className='text-success' />}
+          </td>
+          <td style={TD_WIDTH.threequarters}>
+            {_title}
+          </td>
+          <td style={TD_WIDTH.tenpercent}>
+            <DurationBadge />
+          </td>
+          <td className='td--actions' style={TD_WIDTH.tenpercent}>
+            <Button variant='outline-secondary' size='sm' onClick={handleEditClick} className='button--action'><Pencil /></Button>
+          </td>
+        </tr>
+      )}
+    </Draggable>
+  )
 }
