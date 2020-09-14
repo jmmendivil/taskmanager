@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { Draggable } from 'react-beautiful-dnd'
-import { Button, Badge } from 'react-bootstrap'
+import { Button, Badge, ProgressBar } from 'react-bootstrap'
 import { Trash, Check, Pencil, CheckCircleFill } from 'react-bootstrap-icons'
 import { DURATION, DURATION_LABELS } from '../../config'
+import getProgressPct from '../../utils/getProgressPct'
+import getDiffsTime from '../../utils/getDiffsTime'
+import formatTimeText from '../../utils/formatTimeText'
 
 const TD_WIDTH = {
   fivepercent: { width: '5%' },
@@ -56,12 +59,19 @@ export default function ItemTask ({ task, index, onUpdate, onDelete, disabled })
     return <Badge variant='light'>{label}</Badge>
   }
 
+  const DoneBadge = ({ progress }) => {
+    const { mins, secs } = getDiffsTime([0, 0], progress)
+    const doneTime = formatTimeText(mins, secs)
+    return <Badge variant='success'>{doneTime}</Badge>
+  }
+
   // empty title means new task, edit asap
   useEffect(() => {
     if (task.title === '') setEdit(true)
   }, [task.title])
 
-  const disabledClass = (disabled || task.done) ? 'disabled' : ''
+  const disabledClass = (disabled || task.done) ? ' disabled ' : ''
+  const doneClass = (task.done) ? ' done ' : ''
 
   const getItemClass = (isDragging) => {
     return (isDragging) ? 'is-dragging' : ''
@@ -120,26 +130,35 @@ export default function ItemTask ({ task, index, onUpdate, onDelete, disabled })
       isDragDisabled={task.done || disabled}
     >
       {(provided, snapshot) => (
-        <tr
-          className={disabledClass + ' task-item ' + getItemClass(snapshot.isDragging)}
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
-        >
-          <td style={TD_WIDTH.fivepercent}>
-            {(task.done) && <CheckCircleFill className='text-success' />}
-          </td>
-          <td style={TD_WIDTH.threequarters}>
-            {_title}
-          </td>
-          <td style={TD_WIDTH.tenpercent}>
-            <DurationBadge />
-          </td>
-          <td className='td--actions' style={TD_WIDTH.tenpercent}>
-            <Button variant='outline-secondary' size='sm' onClick={handleEditClick} className='button--action'><Pencil /></Button>
-          </td>
-        </tr>
+        <>
+          <tr
+            className={doneClass + disabledClass + ' task-item ' + getItemClass(snapshot.isDragging)}
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
+          >
+            <td style={TD_WIDTH.fivepercent}>
+              {(task.done) && <DoneBadge progress={task.progress} />}
+            </td>
+            <td style={TD_WIDTH.threequarters}>
+              {_title}
+            </td>
+            <td style={TD_WIDTH.tenpercent}>
+              <DurationBadge />
+            </td>
+            <td className='td--actions' style={TD_WIDTH.tenpercent}>
+              <Button variant='outline-secondary' size='sm' onClick={handleEditClick} className='button--action'><Pencil /></Button>
+            </td>
+          </tr>
+          {/* do not show progress on first task */}
+          {/* do not show progress on if task is done */}
+          {(task.progress > 0 && index > 0 && !task.done) && (
+            <tr className='tr--progress'>
+              <td colSpan={4}>{<ProgressBar now={getProgressPct(task.duration, task.progress)} />}</td>
+            </tr>
+          )}
+        </>
       )}
     </Draggable>
   )

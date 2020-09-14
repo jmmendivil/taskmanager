@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import getDiffsTime from '../utils/getDiffsTime'
+import getProgressPct from '../utils/getProgressPct'
+import formatTimeText from '../utils/formatTimeText'
 
 // use with rAF
 let requestId
@@ -7,17 +9,6 @@ export default function useChronometer () {
   const [status, setStatus] = useState('idle')
   // percent & label
   const [progress, setProgress] = useState([0, '00:00'])
-
-  const getProgressPct = (duration, progress) => {
-    const durationMillis = duration * 60 * 1000
-    return (progress / durationMillis) * 100
-  }
-
-  const formatTimeText = (mins, secs) => {
-    const secsFormat = '0' + secs
-    const minsFormat = '0' + mins
-    return minsFormat.substr(-2) + ':' + secsFormat.substr(-2)
-  }
 
   const startChronometer = (duration, prevProgress, startDate) => {
     let start

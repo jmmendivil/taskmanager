@@ -39,7 +39,7 @@ export default [
     title: 'Elit minus maiores rerum nihil neque',
     done: true,
     duration: 60,
-    progress: 0,
+    progress: 6000,
     created: 23084224,
     updates: [
       [32423, 23423],

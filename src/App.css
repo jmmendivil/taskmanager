@@ -13,6 +13,10 @@
   color: white;
 }
 
+.task-item:first-of-type {
+  border: 3px solid var(--light);
+}
+
 .task-item {
   background-color: var(--white);
 }
@@ -20,6 +24,10 @@
 .disabled.task-item {
   color: var(--gray);
   background-color: var(--light);
+}
+
+.done.task-item {
+  font-style: italic;
 }
 
 .row {
@@ -80,4 +88,14 @@
   font-size: 75% !important;
   line-height: 1.5 !important;
   border-radius: .2rem !important;
+}
+
+.tr--progress td {
+  padding: 0 !important;
+  border: none !important;
+}
+.tr--progress .progress {
+  height: 0.25rem !important;
+  border-radius: unset !important;
+  /* background-color: var(--light); */
 }
