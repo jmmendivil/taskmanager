@@ -1,10 +1,11 @@
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import React, { useEffect, useCallback } from 'react'
-import { Container, Row, Col, Button, Tabs, Tab } from 'react-bootstrap'
+import React, { useState, useEffect, useCallback } from 'react'
+import { Container, Row, Col, Button, Tabs, Tab, Badge } from 'react-bootstrap'
 import { Plus } from 'react-bootstrap-icons'
 import useTasks from './hooks/useTasks'
 import { TASK_MODEL } from './models/task.model'
+import { DURATION, DURATION_LABELS } from 'Constants/task.const'
 import Chronometer from './components/Chronometer/Chronometer'
 import useChronometer from './hooks/useChronometer'
 import getDiffs from 'Utils/getDiffsTime'
@@ -13,7 +14,10 @@ import TasksList from './components/TasksList/TasksList'
 function App () {
   // -- Tasks
   const createEmptyTask = useCallback(() => ({ ...TASK_MODEL, created: Date.now() }), [])
-  const { tasks, pendingTasks, doneTasks, firstTask, createTask, updateTask, deleteTask, setTasks } = useTasks(createEmptyTask)
+  const {
+    tasks, pendingTasks, setFilterDoneTasks, doneTasks, firstTask, createTask,
+    updateTask, deleteTask, setTasks
+  } = useTasks(createEmptyTask)
   const hasTasks = (tasks.length > 0)
 
   // simple validation
@@ -46,6 +50,16 @@ function App () {
     newTasks.push(firstTask)
     setTasks(newTasks)
   }
+
+  const [filter, setFilter] = useState()
+  const handleFilterDoneTasks = useCallback(duration => {
+    setFilter(duration)
+    if (typeof duration === 'undefined') {
+      setFilterDoneTasks(undefined)
+    } else {
+      setFilterDoneTasks(() => t => t.duration === duration)
+    }
+  }, [setFilter, setFilterDoneTasks])
 
   // -- Chronometer
   const { status, progress, startChronometer, stopChronometer, resetChronometer } = useChronometer()
@@ -145,8 +159,8 @@ function App () {
           )}
         </Col>
         <Col md={8}>
-          <Tabs defaultActiveKey='tasks'>
-            <Tab eventKey='icon' title='🗒' disabled></Tab>
+          <Tabs defaultActiveKey='done'>
+            <Tab eventKey='icon' title='🗒' disabled />
             <Tab eventKey='tasks' title='Pendientes'>
               <TasksList
                 tasks={pendingTasks}
@@ -157,7 +171,36 @@ function App () {
               />
             </Tab>
             <Tab eventKey='done' title='Completadas'>
-              <TasksList tasks={doneTasks} />
+              <Row>
+                <Col>
+                  Filtrar:{' '}
+                  <Badge
+                    onClick={() => handleFilterDoneTasks(undefined)}
+                    variant={(typeof filter === 'undefined') ? 'dark' : 'light'}
+                  >&times;
+                  </Badge>
+                  <Badge
+                    onClick={() => handleFilterDoneTasks(DURATION.SHORT)}
+                    variant={(filter === DURATION.SHORT) ? 'dark' : 'light'}
+                  >{DURATION_LABELS.SHORT}
+                  </Badge>
+                  <Badge
+                    onClick={() => handleFilterDoneTasks(DURATION.MIDDLE)}
+                    variant={(filter === DURATION.MIDDLE) ? 'dark' : 'light'}
+                  >{DURATION_LABELS.MIDDLE}
+                  </Badge>
+                  <Badge
+                    onClick={() => handleFilterDoneTasks(DURATION.LARGE)}
+                    variant={(filter === DURATION.LARGE) ? 'dark' : 'light'}
+                  >{DURATION_LABELS.LARGE}
+                  </Badge>
+                </Col>
+              </Row>
+              <Row>
+                <Col>
+                  <TasksList tasks={doneTasks} />
+                </Col>
+              </Row>
             </Tab>
           </Tabs>
         </Col>

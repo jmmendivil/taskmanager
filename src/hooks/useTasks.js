@@ -9,6 +9,7 @@ if (typeof savedTasks === 'string') savedTasks = JSON.parse(savedTasks)
 export default function useTasks (newTaskModelFn) {
   const [tasks, setTasks] = useState(savedTasks)
   const [firstTask, setFirstTask] = useState(savedTasks[0])
+  const [filterDoneTasks, setFilterDoneTasks] = useState()
 
   useEffect(() => {
     if (typeof tasks !== 'undefined') {
@@ -38,7 +39,14 @@ export default function useTasks (newTaskModelFn) {
     setTasks(newTasks)
   }
 
-  const doneTasks = useMemo(() => tasks.filter(t => t.done), [tasks])
+  const doneTasks = useMemo(() => {
+    let done = tasks.filter(t => t.done)
+    if (typeof filterDoneTasks !== 'undefined') {
+      done = done.filter(filterDoneTasks)
+    }
+    return done
+  }, [tasks, filterDoneTasks])
+
   const pendingTasks = useMemo(() => {
     const pending = tasks.filter(t => !t.done)
     // create dummy task
@@ -49,5 +57,15 @@ export default function useTasks (newTaskModelFn) {
       : pending
   }, [tasks, newTaskModelFn])
 
-  return { tasks, pendingTasks, doneTasks, firstTask, createTask, updateTask, deleteTask, setTasks }
+  return {
+    tasks,
+    pendingTasks,
+    doneTasks,
+    setFilterDoneTasks,
+    firstTask,
+    createTask,
+    updateTask,
+    deleteTask,
+    setTasks
+  }
 }
