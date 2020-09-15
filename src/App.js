@@ -64,6 +64,12 @@ function App () {
     resetChronometer(firstTask.duration, firstTask.progress)
   }, [firstTask])
 
+  const handleChronoReset = () => {
+    stopChronometer()
+    addUpdateToFirstTask('RESET')
+    firstTask.progress = 0
+    updateTask(0)(firstTask)
+  }
   // stop chronometer on window close
   useEffect(() => {
     if (isChronoRunning) {
