@@ -6,6 +6,7 @@ import { DURATION, DURATION_LABELS } from 'Constants/task.const'
 import getProgressPct from 'Utils/getProgressPct'
 import getDiffsTime from 'Utils/getDiffsTime'
 import formatTimeText from 'Utils/formatTimeText'
+import formatDate from 'Utils/formatDate'
 
 export default function ItemTask ({ task, index, onUpdate, onDelete, disabled }) {
   const [editing, setEdit] = useState(false)
@@ -134,14 +135,21 @@ export default function ItemTask ({ task, index, onUpdate, onDelete, disabled })
             {...provided.dragHandleProps}
             style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
           >
-            {(task.done) && (
-              <td><DoneBadge progress={task.progress} /></td>
-            )}
             <td className='w-75'>
               {_title}
+              {(task.done) && (
+                <div className='text-muted small td--actions'>
+                  <span>
+                    Creada: {formatDate(task.created)} - Terminada: {formatDate(task.updates[0][0])}
+                  </span>
+                </div>
+              )}
             </td>
-            <td>
+            <td className='text-right'>
               <DurationBadge />
+              {(task.done) && (
+                <DoneBadge progress={task.progress} />
+              )}
             </td>
             {(!task.done) && (
               <td className='td--actions'>

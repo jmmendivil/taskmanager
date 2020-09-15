@@ -1,10 +1,10 @@
 export default [
   {
     title: 'A Sed explicabo voluptate a ex alias esse ',
-    done: false,
+    done: true,
     duration: 30,
     progress: 0,
-    created: 23947829,
+    created: 1599868800000,
     updates: [
       [32423, 23423],
       [32423, 23423],
@@ -12,11 +12,11 @@ export default [
     ]
   },
   {
-    title: 'B Illo provident repellat',
-    done: false,
+    title: 'B Illo provident repellat (14)',
+    done: true,
     duration: 45,
     progress: 0,
-    created: 2349087,
+    created: 1600079674000,
     updates: [
       [32423, 23423],
       [32423, 23423],
@@ -24,11 +24,23 @@ export default [
     ]
   },
   {
-    title: 'C Dolor odit quod voluptatum nulla totam',
-    done: false,
+    title: 'C Dolor odit quod voluptatum nulla totam (14)',
+    done: true,
     duration: 60,
     progress: 0,
-    created: 23084029,
+    created: 1600079688000,
+    updates: [
+      [32423, 23423],
+      [32423, 23423],
+      [32423, 23423]
+    ]
+  },
+  {
+    title: 'C Dolor odit quod voluptatum nulla totam (15)',
+    done: true,
+    duration: 30,
+    progress: 0,
+    created: 1600166074000,
     updates: [
       [32423, 23423],
       [32423, 23423],
@@ -40,7 +52,7 @@ export default [
     done: true,
     duration: 60,
     progress: 6000,
-    created: 23084224,
+    created: 1597017600000,
     updates: [
       [32423, 23423],
       [32423, 23423],

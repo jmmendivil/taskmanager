@@ -2,6 +2,7 @@ import React from 'react'
 import { Table } from 'react-bootstrap'
 import { DragDropContext, Droppable } from 'react-beautiful-dnd'
 import ItemTask from './components/ItemTask'
+import { EmojiFrown } from 'react-bootstrap-icons'
 
 export default function TasksList ({ tasks = [], handleDragEnd = () => {}, updateTask = () => {}, deleteTask = () => {}, isChronoRunning = false }) {
   const hasTasks = (tasks.length > 0)
@@ -24,6 +25,14 @@ export default function TasksList ({ tasks = [], handleDragEnd = () => {}, updat
                   task={task}
                 />
               ))}
+              {(!hasTasks) && (
+                <tr>
+                  <td className='text-center text-muted'>
+                    <EmojiFrown size={24} />
+                    <p>Sin tareas por mostrar.</p>
+                  </td>
+                </tr>
+              )}
               {provided.placeholder}
             </tbody>
           )}

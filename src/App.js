@@ -5,17 +5,20 @@ import { Container, Row, Col, Button, Tabs, Tab, Badge } from 'react-bootstrap'
 import { Plus } from 'react-bootstrap-icons'
 import useTasks from './hooks/useTasks'
 import { TASK_MODEL } from './models/task.model'
-import { DURATION, DURATION_LABELS } from 'Constants/task.const'
 import Chronometer from './components/Chronometer/Chronometer'
 import useChronometer from './hooks/useChronometer'
 import getDiffs from 'Utils/getDiffsTime'
+import { startOfWeekMs, endfOfWeekMs } from 'Utils/weekMillis'
 import TasksList from './components/TasksList/TasksList'
+import Filters from './components/Filters/Filters'
+import formatDate from './utils/formatDate'
+import useFilters from './hooks/useFilters'
 
 function App () {
   // -- Tasks
   const createEmptyTask = useCallback(() => ({ ...TASK_MODEL, created: Date.now() }), [])
   const {
-    tasks, pendingTasks, setFilterDoneTasks, doneTasks, firstTask, createTask,
+    tasks, pendingTasks, setFiltersDoneTasks, doneTasks, firstTask, createTask,
     updateTask, deleteTask, setTasks
   } = useTasks(createEmptyTask)
   const hasTasks = (tasks.length > 0)
@@ -51,15 +54,9 @@ function App () {
     setTasks(newTasks)
   }
 
-  const [filter, setFilter] = useState()
-  const handleFilterDoneTasks = useCallback(duration => {
-    setFilter(duration)
-    if (typeof duration === 'undefined') {
-      setFilterDoneTasks(undefined)
-    } else {
-      setFilterDoneTasks(() => t => t.duration === duration)
-    }
-  }, [setFilter, setFilterDoneTasks])
+  // -- Filters
+  // this state is shared with Graph :V
+  const [filters, setFilters] = useFilters(setFiltersDoneTasks)
 
   // -- Chronometer
   const { status, progress, startChronometer, stopChronometer, resetChronometer } = useChronometer()
@@ -195,6 +192,12 @@ function App () {
                   >{DURATION_LABELS.LARGE}
                   </Badge>
                 </Col>
+              </Row>
+              <Row className='filters'>
+                <Filters
+                  filters={filters}
+                  setFilters={setFilters}
+                />
               </Row>
               <Row>
                 <Col>
