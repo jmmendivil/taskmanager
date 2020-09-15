@@ -1,21 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Draggable } from 'react-beautiful-dnd'
 import { Button, Badge, ProgressBar } from 'react-bootstrap'
-import { Trash, Check, Pencil, CheckCircleFill } from 'react-bootstrap-icons'
-import { DURATION, DURATION_LABELS } from '../../config'
-import getProgressPct from '../../utils/getProgressPct'
-import getDiffsTime from '../../utils/getDiffsTime'
-import formatTimeText from '../../utils/formatTimeText'
-
-const TD_WIDTH = {
-  fivepercent: { width: '5%' },
-  tenpercent: { width: '10%' },
-  fifteenpercent: { width: '15%' },
-  onequarter: { width: '25%' },
-  half: { width: '50%' },
-  threequarters: { width: '75%' },
-  full: { width: '100%' }
-}
 
 export default function ItemTask ({ task, index, onUpdate, onDelete, disabled }) {
   const [editing, setEdit] = useState(false)
@@ -37,7 +22,7 @@ export default function ItemTask ({ task, index, onUpdate, onDelete, disabled })
   }
   const handleCustomDuration = e => {
     const duration = +e.target.value
-    if (duration > 0 && duration < 120) setDuration(duration)
+    if (duration > 0 && duration <= DURATION.LARGE) setDuration(duration)
   }
 
   const DurationBadge = () => {
@@ -88,7 +73,7 @@ export default function ItemTask ({ task, index, onUpdate, onDelete, disabled })
     return (
       <>
         <tr className='task-item is-editing'>
-          <td colSpan={2} style={TD_WIDTH.threequarters}>
+          <td colSpan={2} className='w-75'>
             <input
               type='text'
               value={_title}
@@ -97,26 +82,32 @@ export default function ItemTask ({ task, index, onUpdate, onDelete, disabled })
               placeholder='Tarea'
             />
           </td>
-          <td colSpan={2} style={TD_WIDTH.onequarter}>
-            <input
-              type='number'
-              min={1}
-              max={120}
-              onChange={handleCustomDuration}
-              className='form-control form-control-xs'
-              placeholder='Custom'
-              value={_duration}
-            />
-            <Badge onClick={() => setDuration(DURATION.SHORT)} variant={(_duration === DURATION.SHORT) ? 'dark' : 'light'}>Corta</Badge>
-            <Badge onClick={() => setDuration(DURATION.MIDDLE)} variant={(_duration === DURATION.MIDDLE) ? 'dark' : 'light'}>Media</Badge>
-            <Badge onClick={() => setDuration(DURATION.LARGE)} variant={(_duration === DURATION.LARGE) ? 'dark' : 'light'}>Larga</Badge>
+          <td colSpan={2} className='w-25'>
+            <div className='input--custom-time mb-1 d-flex flex-row justify-content-around align-items-baseline'>
+              <label>Duracion (min):</label>
+              <input
+                type='number'
+                style={{ width: '50px', display: 'inline' }}
+                min={1}
+                max={120}
+                onChange={handleCustomDuration}
+                className='form-control'
+                placeholder='Custom'
+                value={_duration}
+              />
+            </div>
+            <div className='d-flex flex-row justify-content-around'>
+              <Badge onClick={() => setDuration(DURATION.SHORT)} variant={(_duration === DURATION.SHORT) ? 'dark' : 'light'}>Corta</Badge>
+              <Badge onClick={() => setDuration(DURATION.MIDDLE)} variant={(_duration === DURATION.MIDDLE) ? 'dark' : 'light'}>Media</Badge>
+              <Badge onClick={() => setDuration(DURATION.LARGE)} variant={(_duration === DURATION.LARGE) ? 'dark' : 'light'}>Larga</Badge>
+            </div>
           </td>
         </tr>
         <tr className='tr--controls'>
-          <td colSpan={2} className='td--delete' style={TD_WIDTH.threequarters}>
+          <td colSpan={2} className='td--delete w-75'>
             <Button onClick={handleDeleteClick} variant='link'><Trash color='#dc3545' /></Button>
           </td>
-          <td colSpan={2} style={TD_WIDTH.onequarter}>
+          <td colSpan={2} className='w-25'>
             <Button variant='success' size='sm' onClick={handleSaveClick} block><Check /></Button>
           </td>
         </tr>
@@ -125,8 +116,8 @@ export default function ItemTask ({ task, index, onUpdate, onDelete, disabled })
   }
   return (
     <Draggable
-      draggableId={task.created + 'zzz'}
       index={index}
+      draggableId={task.created + 'zzz'}
       isDragDisabled={task.done || disabled}
     >
       {(provided, snapshot) => (
@@ -138,21 +129,22 @@ export default function ItemTask ({ task, index, onUpdate, onDelete, disabled })
             {...provided.dragHandleProps}
             style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
           >
-            <td style={TD_WIDTH.fivepercent}>
-              {(task.done) && <DoneBadge progress={task.progress} />}
-            </td>
-            <td style={TD_WIDTH.threequarters}>
+            {(task.done) && (
+              <td><DoneBadge progress={task.progress} /></td>
+            )}
+            <td className='w-75'>
               {_title}
             </td>
-            <td style={TD_WIDTH.tenpercent}>
+            <td>
               <DurationBadge />
             </td>
-            <td className='td--actions' style={TD_WIDTH.tenpercent}>
-              <Button variant='outline-secondary' size='sm' onClick={handleEditClick} className='button--action'><Pencil /></Button>
-            </td>
+            {(!task.done) && (
+              <td className='td--actions'>
+                <Button variant='outline-secondary' size='sm' onClick={handleEditClick} className='button--action'><Pencil /></Button>
+              </td>
+            )}
           </tr>
-          {/* do not show progress on first task */}
-          {/* do not show progress on if task is done */}
+          {/* do not show progress on first task or task is done */}
           {(task.progress > 0 && index > 0 && !task.done) && (
             <tr className='tr--progress'>
               <td colSpan={4}>{<ProgressBar now={getProgressPct(task.duration, task.progress)} />}</td>

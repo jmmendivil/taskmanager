@@ -10,6 +10,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import Chronometer from './components/Chronometer/Chronometer'
 import useChronometer from './hooks/useChronometer'
 import getDiffs from './utils/getDiffsTime'
+import TasksList from './components/TasksList/TasksList'
 
 function App () {
   // -- Tasks
@@ -161,6 +162,13 @@ function App () {
             />
           )}
         </Col>
+              <TasksList
+                tasks={pendingTasks}
+                handleDragEnd={handleDragEnd}
+                updateTask={updateTask}
+                deleteTask={deleteTask}
+                isChronoRunning={isChronoRunning}
+              />
       </Row>
     </Container>
   )
