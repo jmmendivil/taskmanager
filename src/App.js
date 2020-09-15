@@ -7,9 +7,10 @@ import useTasks from './hooks/useTasks'
 import { TASK_MODEL } from './models/task'
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import { TASK_MODEL } from './models/task.model'
 import Chronometer from './components/Chronometer/Chronometer'
 import useChronometer from './hooks/useChronometer'
-import getDiffs from './utils/getDiffsTime'
+import getDiffs from 'Utils/getDiffsTime'
 import TasksList from './components/TasksList/TasksList'
 
 function App () {

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import getDiffsTime from '../utils/getDiffsTime'
-import getProgressPct from '../utils/getProgressPct'
-import formatTimeText from '../utils/formatTimeText'
+import getDiffsTime from 'Utils/getDiffsTime'
+import getProgressPct from 'Utils/getProgressPct'
+import formatTimeText from 'Utils/formatTimeText'
 
 // use with rAF
 let requestId
