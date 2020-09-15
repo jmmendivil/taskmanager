@@ -13,8 +13,8 @@
   color: white;
 }
 
-.task-item:first-of-type {
-  border: 3px solid var(--light);
+.task-item:first-of-type td {
+  border-top: none;
 }
 
 .task-item {
@@ -23,7 +23,6 @@
 
 .disabled.task-item {
   color: var(--gray);
-  background-color: var(--light);
 }
 
 .done.task-item {
@@ -71,8 +70,8 @@
 }
 
 .is-dragging td {
-  border-bottom: 1px solid;
-  border-color: var(--primary) !important;
+  border-top: 1px solid var(--primary) !important;
+  border-bottom: 1px solid var(--primary) !important;
   background-color: #e3f0ff;
 }
 .is-dragging td:first-of-type {
@@ -80,14 +79,6 @@
 }
 .is-dragging td:last-of-type {
   border-right: 1px solid var(--primary) !important;
-}
-
-.form-control-xs {
-  /* height: calc(1.5em + .5rem + 2px); */
-  padding: .25rem .5rem !important;
-  font-size: 75% !important;
-  line-height: 1.5 !important;
-  border-radius: .2rem !important;
 }
 
 .tr--progress td {
@@ -98,4 +89,14 @@
   height: 0.25rem !important;
   border-radius: unset !important;
   /* background-color: var(--light); */
+}
+
+.input--custom-time {
+  color: var(--gray);
+  font-size: 75%;
+  display: block;
+}
+.input--custom-time input {
+  font-size: 75%;
+  display: inline;
 }

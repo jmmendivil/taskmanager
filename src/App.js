@@ -1,12 +1,7 @@
-import React, { useEffect } from 'react'
-import { DragDropContext, Droppable } from 'react-beautiful-dnd'
-import { Container, Row, Col, Button, Table } from 'react-bootstrap'
-import { Plus } from 'react-bootstrap-icons'
-import ItemTask from './components/ItemTask/ItemTask'
-import useTasks from './hooks/useTasks'
-import { TASK_MODEL } from './models/task'
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import { Container, Row, Col, Button, Tabs, Tab } from 'react-bootstrap'
+import { Plus } from 'react-bootstrap-icons'
 import { TASK_MODEL } from './models/task.model'
 import Chronometer from './components/Chronometer/Chronometer'
 import useChronometer from './hooks/useChronometer'
@@ -112,7 +107,7 @@ function App () {
   return (
     <Container>
       <Row>
-        <Col>Arkon Timer App</Col>
+        <Col><h1 className='display-4'>Task Tracker</h1></Col>
       </Row>
 
       <Row>
@@ -124,45 +119,24 @@ function App () {
       </Row>
 
       <Row>
-        <Col md={8}>
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Table className='table--dnd'>
-              <Droppable droppableId='9999'>
-                {provided => (
-                  <tbody
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                  >
-                    {(hasTasks) && tasks.map((task, i) => (
-                      <ItemTask
-                        key={task.created}
-                        index={i}
-                        onUpdate={updateTask(i)}
-                        onDelete={deleteTask(i)}
-                        disabled={isChronoRunning}
-                        task={task}
-                      />
-                    ))}
-                    {provided.placeholder}
-                  </tbody>
-                )}
-              </Droppable>
-            </Table>
-          </DragDropContext>
-        </Col>
         <Col md={4}>
           {(hasTasks) && (
             <Chronometer
               status={(isChronoDisabled) ? 'disabled' : status}
-              title={tasks[0].title}
+              title={pendingTasks[0].title}
               time={progress[1]}
               pct={progress[0]}
               onDone={handleDoneTask}
               onStart={handleChronoStart}
               onStop={handleChronoStop}
+              onReset={handleChronoReset}
             />
           )}
         </Col>
+        <Col md={8}>
+          <Tabs defaultActiveKey='tasks'>
+            <Tab eventKey='icon' title='🗒' disabled></Tab>
+            <Tab eventKey='tasks' title='Pendientes'>
               <TasksList
                 tasks={pendingTasks}
                 handleDragEnd={handleDragEnd}
@@ -170,6 +144,12 @@ function App () {
                 deleteTask={deleteTask}
                 isChronoRunning={isChronoRunning}
               />
+            </Tab>
+            <Tab eventKey='done' title='Completadas'>
+              <TasksList tasks={doneTasks} />
+            </Tab>
+          </Tabs>
+        </Col>
       </Row>
     </Container>
   )

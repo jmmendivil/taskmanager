@@ -15,7 +15,7 @@ export default function Chronometer ({ status, title, time, pct, onStart, onStop
   return (
     <Card>
       <Card.Header>
-        {title}
+        ⏱ {title}
       </Card.Header>
       <Card.Body>
         <div className={timerClass + ' card-title h1 text-center text-monospace'}>
