@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import getDiffsTime from 'Utils/getDiffsTime'
 import getProgressPct from 'Utils/getProgressPct'
 import formatTimeText from 'Utils/formatTimeText'
@@ -38,21 +38,21 @@ export default function useChronometer () {
     setStatus('started')
   }
 
-  const stopChronometer = () => {
+  const stopChronometer = useCallback(() => {
     if (requestId) {
       window.cancelAnimationFrame(requestId)
       requestId = undefined
     }
     setStatus('stoped')
-  }
+  }, [])
 
-  const resetChronometer = (duration, prevProgress) => {
+  const resetChronometer = useCallback((duration, prevProgress) => {
     const { diff, secs, mins } = getDiffsTime([0, 0], prevProgress)
     setProgress([
       getProgressPct(duration, diff),
       formatTimeText(mins, secs)
     ])
-  }
+  }, [])
 
   return { status, progress, startChronometer, stopChronometer, resetChronometer }
 }

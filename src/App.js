@@ -1,7 +1,9 @@
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import React, { useEffect, useCallback } from 'react'
 import { Container, Row, Col, Button, Tabs, Tab } from 'react-bootstrap'
 import { Plus } from 'react-bootstrap-icons'
+import useTasks from './hooks/useTasks'
 import { TASK_MODEL } from './models/task.model'
 import Chronometer from './components/Chronometer/Chronometer'
 import useChronometer from './hooks/useChronometer'
@@ -10,10 +12,10 @@ import TasksList from './components/TasksList/TasksList'
 
 function App () {
   // -- Tasks
-  const { tasks, firstTask, createTask, updateTask, deleteTask, setTasks } = useTasks(
-    () => ({ ...TASK_MODEL, created: Date.now() })
-  )
+  const createEmptyTask = useCallback(() => ({ ...TASK_MODEL, created: Date.now() }), [])
+  const { tasks, pendingTasks, doneTasks, firstTask, createTask, updateTask, deleteTask, setTasks } = useTasks(createEmptyTask)
   const hasTasks = (tasks.length > 0)
+
   // simple validation
   // y u no use current emtpy-task? ლ(ಠ益ಠლ)
   const handleCreateTask = () => {
@@ -21,13 +23,23 @@ function App () {
     createTask()
   }
 
+  // side effect
+  const addUpdateToFirstTask = (status = false, now = Date.now()) => {
+    firstTask.updates.unshift(
+      (status) ? [now, status] : [now]
+    )
+  }
+
   // running task is always the first one
   // mark done and move it to the end
+  // (done task cant be the first one)
   const handleDoneTask = () => {
-    stopChronometer()
-    // no need to update task
-    // because next step is to swap
+    // stop chrono and save latest update
+    if (isChronoRunning) handleChronoStop()
+    else stopChronometer()
     firstTask.done = true
+    // add update with DONE status
+    addUpdateToFirstTask('DONE')
     // swap tasks
     const newTasks = [...tasks]
     newTasks.shift()
@@ -42,10 +54,11 @@ function App () {
   const handleChronoStart = () => {
     // update latest start-date
     const now = Date.now()
-    firstTask.updates.unshift([now])
+    addUpdateToFirstTask(false, now)
     startChronometer(firstTask.duration, firstTask.progress, now)
   }
-  const handleChronoStop = () => {
+  // with hook because its used with useEffect
+  const handleChronoStop = useCallback(() => {
     stopChronometer()
     // update latest end-date
     firstTask.updates[0].push(Date.now())
@@ -54,12 +67,7 @@ function App () {
     firstTask.progress = diff
     // update first tasks
     updateTask(0)(firstTask)
-  }
-  // show labels with first task progress
-  useEffect(() => {
-    if (typeof firstTask === 'undefined') return
-    resetChronometer(firstTask.duration, firstTask.progress)
-  }, [firstTask])
+  }, [firstTask, stopChronometer, updateTask])
 
   const handleChronoReset = () => {
     stopChronometer()
@@ -78,15 +86,10 @@ function App () {
       window.addEventListener('beforeunload', handleBeforeunload)
       return () => { window.removeEventListener('beforeunload', handleBeforeunload) }
     }
-  }, [isChronoRunning])
+  }, [isChronoRunning, handleChronoStop])
 
   // intercept chrono status
-  let isChronoDisabled
-  if (firstTask) {
-    isChronoDisabled = (firstTask.done || firstTask.title === '')
-  } else {
-    isChronoDisabled = true // no firstTask, disable chronometer
-  }
+  const isChronoDisabled = (firstTask.done || firstTask.title === '')
 
   // --- DnD
   const handleDragEnd = result => {
@@ -104,6 +107,11 @@ function App () {
     setTasks(newTasks)
   }
 
+  // show labels with (peding) first task progress
+  useEffect(() => {
+    resetChronometer(pendingTasks[0].duration, pendingTasks[0].progress)
+  }, [pendingTasks, resetChronometer])
+
   return (
     <Container>
       <Row>
@@ -112,8 +120,11 @@ function App () {
 
       <Row>
         <Col>
-          <Button onClick={handleCreateTask} disabled={isChronoRunning}>
-            <Plus /> Nueva Tarea
+          <Button
+            className='float-right'
+            onClick={handleCreateTask}
+            disabled={isChronoRunning}
+          ><Plus /> Nueva Tarea
           </Button>
         </Col>
       </Row>

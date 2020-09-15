@@ -1,5 +1,5 @@
 import _tasks from '../models/tasks.seed'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 
 // load previous tasks
 let savedTasks = window.localStorage.getItem('arkon_tasks')
@@ -27,16 +27,27 @@ export default function useTasks (newTaskModelFn) {
     newTasks.unshift(newModel)
     setTasks(newTasks)
   }
-  const updateTask = index => updatedTask => {
+  const updateTask = useCallback(index => updatedTask => {
     const newTasks = [...tasks]
     newTasks[index] = updatedTask
     setTasks(newTasks)
-  }
+  }, [tasks])
   const deleteTask = index => () => {
     const newTasks = [...tasks]
     newTasks.splice(index, 1)
     setTasks(newTasks)
   }
 
-  return { tasks, firstTask, createTask, updateTask, deleteTask, setTasks }
+  const doneTasks = useMemo(() => tasks.filter(t => t.done), [tasks])
+  const pendingTasks = useMemo(() => {
+    const pending = tasks.filter(t => !t.done)
+    // create dummy task
+    // the real one will be created in state once the user
+    // press the Done (edit) button
+    return (pending.length === 0)
+      ? [newTaskModelFn()]
+      : pending
+  }, [tasks, newTaskModelFn])
+
+  return { tasks, pendingTasks, doneTasks, firstTask, createTask, updateTask, deleteTask, setTasks }
 }
