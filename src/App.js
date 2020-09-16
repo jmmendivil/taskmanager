@@ -1,20 +1,24 @@
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import React, { useState, useEffect, useCallback } from 'react'
-import { Container, Row, Col, Button, Tabs, Tab, Badge } from 'react-bootstrap'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import { Container, Row, Col, Button, Tabs, Tab } from 'react-bootstrap'
 import { Plus } from 'react-bootstrap-icons'
 import useTasks from './hooks/useTasks'
 import { TASK_MODEL } from './models/task.model'
 import Chronometer from './components/Chronometer/Chronometer'
 import useChronometer from './hooks/useChronometer'
 import getDiffs from 'Utils/getDiffsTime'
-import { startOfWeekMs, endfOfWeekMs } from 'Utils/weekMillis'
+import { startOfWeekMs, endfOfWeekMs, dayInMillis } from 'Utils/weekMillis'
 import TasksList from './components/TasksList/TasksList'
 import Filters from './components/Filters/Filters'
-import formatDate from './utils/formatDate'
 import useFilters from './hooks/useFilters'
+import Chart from './components/Chart/Chart'
+import useChart from './hooks/useChart'
 
 function App () {
+  // -- Tabs
+  const [tabKey, setTabKey] = useState()
+
   // -- Tasks
   const createEmptyTask = useCallback(() => ({ ...TASK_MODEL, created: Date.now() }), [])
   const {
@@ -27,6 +31,7 @@ function App () {
   // y u no use current emtpy-task? ლ(ಠ益ಠლ)
   const handleCreateTask = () => {
     if (firstTask.title === '') return
+    setTabKey('tasks')
     createTask()
   }
 
@@ -55,7 +60,7 @@ function App () {
   }
 
   // -- Filters
-  // this state is shared with Graph :V
+  // this state is shared with Chart :V
   const [filters, setFilters] = useFilters(setFiltersDoneTasks)
 
   // -- Chronometer
@@ -123,6 +128,12 @@ function App () {
     resetChronometer(pendingTasks[0].duration, pendingTasks[0].progress)
   }, [pendingTasks, resetChronometer])
 
+  // --- Graph
+  const chartData = useChart(doneTasks)
+  const minDomain = useMemo(() => (filters[1]) ? { x: startOfWeekMs } : { x: new Date('2020-01-01') }, [filters])
+  const maxDomain = useMemo(() => (filters[1]) ? { x: endfOfWeekMs } : { x: +Date.now() + (dayInMillis * 3) }, [filters])
+  const barWidth = useMemo(() => (filters[1]) ? 10 : 2, [filters])
+
   return (
     <Container>
       <Row>
@@ -156,7 +167,11 @@ function App () {
           )}
         </Col>
         <Col md={8}>
-          <Tabs defaultActiveKey='done'>
+          <Tabs
+            defaultActiveKey='tasks'
+            activeKey={tabKey}
+            onSelect={(k) => setTabKey(k)}
+          >
             <Tab eventKey='icon' title='🗒' disabled />
             <Tab eventKey='tasks' title='Pendientes'>
               <TasksList
@@ -169,28 +184,16 @@ function App () {
             </Tab>
             <Tab eventKey='done' title='Completadas'>
               <Row>
-                <Col>
-                  Filtrar:{' '}
-                  <Badge
-                    onClick={() => handleFilterDoneTasks(undefined)}
-                    variant={(typeof filter === 'undefined') ? 'dark' : 'light'}
-                  >&times;
-                  </Badge>
-                  <Badge
-                    onClick={() => handleFilterDoneTasks(DURATION.SHORT)}
-                    variant={(filter === DURATION.SHORT) ? 'dark' : 'light'}
-                  >{DURATION_LABELS.SHORT}
-                  </Badge>
-                  <Badge
-                    onClick={() => handleFilterDoneTasks(DURATION.MIDDLE)}
-                    variant={(filter === DURATION.MIDDLE) ? 'dark' : 'light'}
-                  >{DURATION_LABELS.MIDDLE}
-                  </Badge>
-                  <Badge
-                    onClick={() => handleFilterDoneTasks(DURATION.LARGE)}
-                    variant={(filter === DURATION.LARGE) ? 'dark' : 'light'}
-                  >{DURATION_LABELS.LARGE}
-                  </Badge>
+                <Col className='d-flex justify-content-center'>
+                  <Chart
+                    data={chartData}
+                    xAxis='date'
+                    yAxis='total'
+                    labelKey='total'
+                    barWidth={barWidth}
+                    minDomain={minDomain}
+                    maxDomain={maxDomain}
+                  />
                 </Col>
               </Row>
               <Row className='filters'>

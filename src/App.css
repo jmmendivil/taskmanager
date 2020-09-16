@@ -26,7 +26,8 @@
 }
 
 .done.task-item {
-  font-style: italic;
+  color: var(--dark);
+  /* font-style: italic; */
 }
 
 .row {
@@ -34,20 +35,24 @@
   margin-bottom: 15px;
 }
 
+.td--actions span,
 .td--actions button,
 .disabled.task-item:hover .td--actions button {
-  visibility: hidden;
+  transition: opacity .3s cubic-bezier(0.5, 1, 0.89, 1);
+  opacity: 0;
   vertical-align: middle !important;
 }
 
 .is-editing {
   background-color: var(--light);
 }
+.task-item:hover .td--actions span,
 .is-editing .td--actions button,
 .task-item:hover .td--actions button {
-  visibility: visible;
+  opacity: 1;
 }
-.is-editing .badge {
+.is-editing .badge,
+.filters .badge {
   cursor: pointer;
 }
 
