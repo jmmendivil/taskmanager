@@ -1,19 +1,20 @@
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import { Container, Row, Col, Button, Tabs, Tab } from 'react-bootstrap'
+import { Container, Row, Col, Button, Tabs, Tab, Spinner } from 'react-bootstrap'
 import { Plus } from 'react-bootstrap-icons'
 import useTasks from './hooks/useTasks'
 import { TASK_MODEL } from './models/task.model'
 import Chronometer from './components/Chronometer/Chronometer'
 import useChronometer from './hooks/useChronometer'
 import getDiffs from 'Utils/getDiffsTime'
-import { startOfWeekMs, endfOfWeekMs, dayInMillis } from 'Utils/weekMillis'
+import { startOfWeekMs, endfOfWeekMs } from 'Utils/weekMillis'
 import TasksList from './components/TasksList/TasksList'
 import Filters from './components/Filters/Filters'
 import useFilters from './hooks/useFilters'
 import Chart from './components/Chart/Chart'
 import useChart from './hooks/useChart'
+import randomData from 'Utils/randomData'
 
 function App () {
   // -- Tabs
@@ -131,9 +132,16 @@ function App () {
   // --- Graph
   const chartData = useChart(doneTasks)
   const minDomain = useMemo(() => (filters[1]) ? { x: startOfWeekMs } : { x: new Date('2020-01-01') }, [filters])
-  const maxDomain = useMemo(() => (filters[1]) ? { x: endfOfWeekMs } : { x: +Date.now() + (dayInMillis * 3) }, [filters])
+  const maxDomain = useMemo(() => (filters[1]) ? { x: endfOfWeekMs } : { x: +Date.now() }, [filters])
   const barWidth = useMemo(() => (filters[1]) ? 10 : 2, [filters])
 
+  // --- Random task generator
+  const [random, setRandom] = useState(false)
+  const handleCreateRandom = async () => {
+    setRandom(true)
+    setTasks(await randomData())
+    setRandom(false)
+  }
   return (
     <Container>
       <Row>
@@ -141,9 +149,26 @@ function App () {
       </Row>
 
       <Row>
+        <Col md={{ offset: 8 }} className='text-right'>
+          <Button
+            variant='outline-secondary'
+            onClick={handleCreateRandom}
+            disabled={isChronoRunning || random}
+          >
+            {(random) && (
+              <Spinner
+                as='span'
+                animation='border'
+                size='sm'
+                role='status'
+                aria-hidden='true'
+              />
+            )}{' '}
+            Random (50)
+          </Button>
+        </Col>
         <Col>
           <Button
-            className='float-right'
             onClick={handleCreateTask}
             disabled={isChronoRunning}
           ><Plus /> Nueva Tarea

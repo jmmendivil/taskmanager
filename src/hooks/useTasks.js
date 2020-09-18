@@ -1,10 +1,10 @@
-import taskSeed from '../models/tasks.seed'
+// import taskSeed from '../models/tasks.seed' // uncomment to add init data
 import { useState, useEffect, useCallback, useMemo } from 'react'
 
 // load previous tasks
 let savedTasks = window.localStorage.getItem('arkon_tasks')
-// if (!savedTasks) savedTasks = [] // use seeds on first use - you can use empty array too []
-if (!savedTasks) savedTasks = taskSeed // use seeds on first use - you can use empty array too []
+if (!savedTasks) savedTasks = [] // use seeds on first use
+// if (!savedTasks) savedTasks = taskSeed // uncomment to add init data
 if (typeof savedTasks === 'string') savedTasks = JSON.parse(savedTasks)
 
 export default function useTasks (newTaskModelFn) {

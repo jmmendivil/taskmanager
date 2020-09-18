@@ -3,7 +3,8 @@ module.exports = {
   webpack: {
     alias: {
       Utils: path.resolve(__dirname, 'src/utils/'),
-      Constants: path.resolve(__dirname, 'src/constants/')
+      Constants: path.resolve(__dirname, 'src/constants/'),
+      Models: path.resolve(__dirname, 'src/models/')
     }
   }
 }
