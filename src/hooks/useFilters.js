@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { startOfWeekMs } from 'Utils/weekMillis'
 
 export default function useFilters (addFiltersToFn = () => {}) {
-  const [filters, setFilters] = useState([undefined, false]) // [duration, weekOnly]
+  const [filters, setFilters] = useState([undefined, true]) // [duration, weekOnly]
   useEffect(() => {
     const [duration, weekOnly] = filters
     const filtersToApply = [] // add filter functions here

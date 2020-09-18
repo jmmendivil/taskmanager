@@ -13,12 +13,12 @@ export default function Filters ({ filters, setFilters }) {
         <Badge
           onClick={() => setFilters([filters[0], false])}
           variant={(!filters[1]) ? VARIANTS.SELECTED : VARIANTS.NORMAL}
-        >Todas
+        >Año
         </Badge>
         <Badge
           onClick={() => setFilters([filters[0], true])}
           variant={(filters[1]) ? VARIANTS.SELECTED : VARIANTS.NORMAL}
-        >Esta semana
+        >Semana
         </Badge>
       </Col>
       <Col className='text-right'>
